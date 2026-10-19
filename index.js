@@ -1225,10 +1225,10 @@ const HTML_PAGE = `
                                     <span>转为语音</span>
                                 </button>
                             </div>
-
-
                         </div>
                     </div>
+
+
                     
                     <div id="transcriptionError" class="error-message" style="display: none;"></div>
                 </div>
@@ -1258,7 +1258,135 @@ const HTML_PAGE = `
             </div>
         </div>
     </div>
+<!-- API 调用文档 -->
+<div id="api-docs" style="max-width: 900px; margin: 40px auto; padding: 30px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    <h2 style="text-align: center; color: #7c83ff; margin-bottom: 10px; font-size: 28px;">📡 API 调用文档</h2>
+    <p style="text-align: center; color: #999; margin-bottom: 30px; font-size: 14px;">支持文字转语音 & 语音转文字，兼容 OpenAI 接口格式</p>
 
+    <!-- 文字转语音 -->
+    <div style="background: #0f3460; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #1a508b;">
+        <h3 style="color: #51cf66; margin: 0 0 8px 0; font-size: 20px;">🎙️ 文字转语音 (TTS)</h3>
+        <p style="color: #a0a0b8; margin: 0 0 16px 0; font-size: 14px;">
+            <code style="background: #16213e; padding: 4px 10px; border-radius: 6px; color: #f08d49; font-weight: bold;">POST /v1/audio/speech</code>
+            <span style="color: #666;"> — 将文字转换为语音（MP3 格式）</span>
+        </p>
+
+        <!-- 请求参数表 -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">
+            <tr style="background:#16213e;">
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">参数名</th>
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">类型</th>
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">必填</th>
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">说明</th>
+            </tr>
+            <tr>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">input</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b; color:#51cf66;">✅</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">要转换的文字内容</td>
+            </tr>
+            <tr style="background:#16213e;">
+                <td style="padding:8px 12px; border:1px solid #1a508b;">voice</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">语音角色，默认 zh-CN-XiaoxiaoNeural</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">speed</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">number</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">语速，默认 1.0</td>
+            </tr>
+            <tr style="background:#16213e;">
+                <td style="padding:8px 12px; border:1px solid #1a508b;">pitch</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">音调，默认 "0"</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">style</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">语音风格，默认 "general"</td>
+            </tr>
+        </table>
+
+        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 JavaScript 示例：</p>
+        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>const response = await fetch('https://your-worker.workers.dev/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        input: "你好，这是一个测试",
+        voice: "zh-CN-XiaoxiaoNeural",
+        speed: 1.0,
+        pitch: "0",
+        style: "general"
+    })
+});
+const audioBlob = await response.blob();
+// 播放或下载音频...</code></pre>
+
+        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 cURL 示例：</p>
+        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>curl -X POST "https://your-worker.workers.dev/v1/audio/speech" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "你好，这是一个测试",
+    "voice": "zh-CN-XiaoxiaoNeural",
+    "speed": 1.0,
+    "pitch": "0",
+    "style": "general"
+  }' \
+  --output speech.mp3</code></pre>
+    </div>
+
+    <!-- 语音转文字 -->
+    <div style="background: #0f3460; border-radius: 12px; padding: 24px; border: 1px solid #1a508b;">
+        <h3 style="color: #45aaf2; margin: 0 0 8px 0; font-size: 20px;">🎧 语音转文字 (STT)</h3>
+        <p style="color: #a0a0b8; margin: 0 0 16px 0; font-size: 14px;">
+            <code style="background: #16213e; padding: 4px 10px; border-radius: 6px; color: #f08d49; font-weight: bold;">POST /v1/audio/transcriptions</code>
+            <span style="color: #666;"> — 将音频文件转录为文字</span>
+        </p>
+
+        <!-- 请求参数表 -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">
+            <tr style="background:#16213e;">
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">参数名</th>
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">类型</th>
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">必填</th>
+                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">说明</th>
+            </tr>
+            <tr>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">file</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">File</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b; color:#51cf66;">✅</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">音频文件（multipart/form-data）</td>
+            </tr>
+            <tr style="background:#16213e;">
+                <td style="padding:8px 12px; border:1px solid #1a508b;">token</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
+                <td style="padding:8px 12px; border:1px solid #1a508b;">SiliconFlow Token（不提供则用默认）</td>
+            </tr>
+        </table>
+
+        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 JavaScript 示例：</p>
+        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>const formData = new FormData();
+formData.append('file', audioFile);        // 音频文件
+formData.append('token', 'sk-...');        // 可选
+
+const response = await fetch(
+    'https://your-worker.workers.dev/v1/audio/transcriptions',
+    { method: 'POST', body: formData }
+);
+
+const result = await response.json();
+console.log(result.text); // 转录结果</code></pre>
+
+        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 cURL 示例：</p>
+        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>curl -X POST "https://your-worker.workers.dev/v1/audio/transcriptions" \
+  -F "file=@audio.mp3" \
+  -F "token=your-siliconflow-token"</code></pre>
+    </div>
     <script>
         let selectedFile = null;
         let currentInputMethod = 'text'; // 'text' or 'file'
