@@ -891,6 +891,98 @@ const HTML_PAGE = `
                 min-width: auto;
             }
         }
+
+        /* =============================================
+           API 文档面板（方案二：tab 切换）
+           ============================================= */
+
+        /* 面板内容区滚动：复用 .transcription-container 卡片外观，内部沿用 .form-container 内边距 */
+        #api-docs-panel .form-container {
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        #api-docs-panel .form-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #api-docs-panel .form-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #api-docs-panel .form-container::-webkit-scrollbar-thumb {
+            background: #3a3a5c;
+            border-radius: 3px;
+        }
+
+        /* API 文档按钮 */
+        .mode-btn-doc {
+            border-color: rgba(124, 131, 255, 0.6);
+        }
+
+        .mode-btn-doc:hover {
+            border-color: rgba(124, 131, 255, 0.9);
+            color: #7c83ff;
+            box-shadow: 0 0 20px rgba(124, 131, 255, 0.25);
+        }
+
+        .mode-btn-doc .mode-icon {
+            color: #7c83ff;
+        }
+
+        /* 激活态使用实心紫色，保证浅色卡片上的文字可读 */
+        .mode-btn-doc.active {
+            background: #7c83ff;
+            border-color: #7c83ff;
+            color: white;
+            box-shadow: 0 0 20px rgba(124, 131, 255, 0.35);
+        }
+
+        .mode-btn-doc.active .mode-icon {
+            color: white;
+        }
+
+        /* 三个按钮时的宽度适配 */
+        @media (min-width: 769px) {
+            .mode-btn {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mode-btn {
+                max-width: none;
+                padding: 12px 14px;
+                font-size: 0.85rem;
+                gap: 6px;
+            }
+
+            #api-docs-panel {
+                padding: 12px;
+                max-height: none;
+            }
+
+            #api-docs-panel #api-docs {
+                padding: 20px 14px !important;
+            }
+
+            #api-docs-panel h2 {
+                font-size: 22px !important;
+            }
+
+            #api-docs-panel h3 {
+                font-size: 17px !important;
+            }
+
+            #api-docs-panel table {
+                font-size: 11px !important;
+            }
+
+            #api-docs-panel pre {
+                font-size: 11px !important;
+                padding: 12px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -965,7 +1057,7 @@ const HTML_PAGE = `
         
         <!-- 主功能切换器 -->
         <div class="mode-switcher">
-            <button type="button" class="mode-btn active" id="ttsMode">
+            <button type="button" class="mode-btn active" id="ttsMode" data-panel="tts-panel">
                 <span class="mode-icon">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
@@ -973,7 +1065,7 @@ const HTML_PAGE = `
                 </span>
                 <span data-i18n="mode.tts">Text to Speech</span>
             </button>
-            <button type="button" class="mode-btn" id="transcriptionMode">
+            <button type="button" class="mode-btn" id="transcriptionMode" data-panel="transcription-panel">
                 <span class="mode-icon">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 9m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
@@ -987,9 +1079,18 @@ const HTML_PAGE = `
                 </span>
                 <span data-i18n="mode.transcription">Speech to Text</span>
             </button>
+            <button type="button" class="mode-btn mode-btn-doc" id="apiDocsMode" data-panel="api-docs-panel">
+                <span class="mode-icon">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                        <path d="M8 12h8v2H8zm0 4h5v2H8z"/>
+                    </svg>
+                </span>
+                <span data-i18n="mode.apiDoc">API Docs</span>
+            </button>
         </div>
-        
-        <div class="main-content">
+
+        <div class="main-content panel" id="tts-panel" data-panel="tts-panel">
             <div class="form-container">
                 <form id="ttsForm">
                     <!-- 输入方式选择 -->
@@ -1144,7 +1245,7 @@ const HTML_PAGE = `
         </div>
         
         <!-- 语音转录界面 -->
-        <div class="transcription-container" id="transcriptionContainer" style="display: none;">
+        <div class="transcription-container panel" id="transcriptionContainer" data-panel="transcription-panel" style="display: none;">
             <div class="form-container">
                 <form id="transcriptionForm">
                     <div class="form-group">
@@ -1227,14 +1328,154 @@ const HTML_PAGE = `
                             </div>
                         </div>
                     </div>
-
-
                     
                     <div id="transcriptionError" class="error-message" style="display: none;"></div>
                 </div>
             </div>
         </div>
         
+        <!-- ===== API 文档面板 ===== -->
+        <div class="transcription-container panel" id="api-docs-panel" data-panel="api-docs-panel" style="display: none;">
+            <div class="form-container">
+                <div id="api-docs" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.3); padding: 30px;">
+
+                    <h2 style="text-align: center; color: #7c83ff; margin-bottom: 10px; font-size: 28px;">
+                        <span data-i18n="apidocs.title">📡 API 调用文档</span>
+                    </h2>
+                    <p style="text-align: center; color: #999; margin-bottom: 30px; font-size: 14px;">
+                        <span data-i18n="apidocs.subtitle">支持文字转语音 & 语音转文字，兼容 OpenAI 接口格式</span>
+                    </p>
+
+                    <!-- ========== 文字转语音 (TTS) ========== -->
+                    <div style="background: #0f3460; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #1a508b;">
+                        <h3 style="color: #51cf66; margin: 0 0 8px 0; font-size: 20px;">
+                            <span data-i18n="apidocs.tts">🎙️ 文字转语音 (TTS)</span>
+                        </h3>
+                        <p style="color: #a0a0b8; margin: 0 0 16px 0; font-size: 14px;">
+                            <code style="background: #16213e; padding: 4px 10px; border-radius: 6px; color: #f08d49; font-weight: bold;">POST /v1/audio/speech</code>
+                            <span style="color: #666;"> — <span data-i18n="apidocs.tts.desc">将文字转换为语音（MP3 格式）</span></span>
+                        </p>
+
+                        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">
+                            <tr style="background:#16213e;">
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.param">参数名</span></th>
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.type">类型</span></th>
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.required">必填</span></th>
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.desc">说明</span></th>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">input</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b; color:#51cf66;">✅</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.tts.input">要转换的文字内容</span></td>
+                            </tr>
+                            <tr style="background:#16213e;">
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">voice</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.optional">可选</span></td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.tts.voice">语音角色，默认 zh-CN-XiaoxiaoNeural</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">speed</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">number</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.optional">可选</span></td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.tts.speed">语速，默认 1.0</span></td>
+                            </tr>
+                            <tr style="background:#16213e;">
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">pitch</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.optional">可选</span></td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.tts.pitch">音调，默认 "0"</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">style</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.optional">可选</span></td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.tts.style">语音风格，默认 "general"</span></td>
+                            </tr>
+                        </table>
+
+                        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;"><span data-i18n="apidocs.jsExample">📋 JavaScript 示例：</span></p>
+                        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>const response = await fetch('https://your-worker.workers.dev/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        input: "你好，这是一个测试",
+        voice: "zh-CN-XiaoxiaoNeural",
+        speed: 1.0,
+        pitch: "0",
+        style: "general"
+    })
+});
+const audioBlob = await response.blob();
+// 播放或下载音频...</code></pre>
+
+                        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;"><span data-i18n="apidocs.curlExample">📋 cURL 示例：</span></p>
+                        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>curl -X POST "https://your-worker.workers.dev/v1/audio/speech" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "input": "你好，这是一个测试",
+    "voice": "zh-CN-XiaoxiaoNeural",
+    "speed": 1.0,
+    "pitch": "0",
+    "style": "general"
+  }' \\
+  --output speech.mp3</code></pre>
+                    </div>
+
+                    <!-- ========== 语音转文字 (STT) ========== -->
+                    <div style="background: #0f3460; border-radius: 12px; padding: 24px; border: 1px solid #1a508b;">
+                        <h3 style="color: #45aaf2; margin: 0 0 8px 0; font-size: 20px;">
+                            <span data-i18n="apidocs.stt">🎧 语音转文字 (STT)</span>
+                        </h3>
+                        <p style="color: #a0a0b8; margin: 0 0 16px 0; font-size: 14px;">
+                            <code style="background: #16213e; padding: 4px 10px; border-radius: 6px; color: #f08d49; font-weight: bold;">POST /v1/audio/transcriptions</code>
+                            <span style="color: #666;"> — <span data-i18n="apidocs.stt.desc">将音频文件转录为文字</span></span>
+                        </p>
+
+                        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">
+                            <tr style="background:#16213e;">
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.param">参数名</span></th>
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.type">类型</span></th>
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.required">必填</span></th>
+                                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;"><span data-i18n="apidocs.col.desc">说明</span></th>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">file</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">File</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b; color:#51cf66;">✅</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.stt.file">音频文件（multipart/form-data）</span></td>
+                            </tr>
+                            <tr style="background:#16213e;">
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">token</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.optional">可选</span></td>
+                                <td style="padding:8px 12px; border:1px solid #1a508b;"><span data-i18n="apidocs.stt.token">SiliconFlow Token（不提供则用服务端默认）</span></td>
+                            </tr>
+                        </table>
+
+                        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;"><span data-i18n="apidocs.jsExample">📋 JavaScript 示例：</span></p>
+                        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>const formData = new FormData();
+formData.append('file', audioFile);        // 音频文件
+formData.append('token', 'sk-...');        // 可选
+
+const response = await fetch(
+    'https://your-worker.workers.dev/v1/audio/transcriptions',
+    { method: 'POST', body: formData }
+);
+
+const result = await response.json();
+console.log(result.text); // 转录结果</code></pre>
+
+                        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;"><span data-i18n="apidocs.curlExample">📋 cURL 示例：</span></p>
+                        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>curl -X POST "https://your-worker.workers.dev/v1/audio/transcriptions" \\
+  -F "file=@audio.mp3" \\
+  -F "token=your-siliconflow-token"</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 公众号推广组件 -->
         <div class="wechat-promotion" id="wechatPromotion" style="display: none;">
             <div class="promotion-header">
@@ -1258,135 +1499,7 @@ const HTML_PAGE = `
             </div>
         </div>
     </div>
-<!-- API 调用文档 -->
-<div id="api-docs" style="max-width: 900px; margin: 40px auto; padding: 30px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
-    <h2 style="text-align: center; color: #7c83ff; margin-bottom: 10px; font-size: 28px;">📡 API 调用文档</h2>
-    <p style="text-align: center; color: #999; margin-bottom: 30px; font-size: 14px;">支持文字转语音 & 语音转文字，兼容 OpenAI 接口格式</p>
 
-    <!-- 文字转语音 -->
-    <div style="background: #0f3460; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #1a508b;">
-        <h3 style="color: #51cf66; margin: 0 0 8px 0; font-size: 20px;">🎙️ 文字转语音 (TTS)</h3>
-        <p style="color: #a0a0b8; margin: 0 0 16px 0; font-size: 14px;">
-            <code style="background: #16213e; padding: 4px 10px; border-radius: 6px; color: #f08d49; font-weight: bold;">POST /v1/audio/speech</code>
-            <span style="color: #666;"> — 将文字转换为语音（MP3 格式）</span>
-        </p>
-
-        <!-- 请求参数表 -->
-        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">
-            <tr style="background:#16213e;">
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">参数名</th>
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">类型</th>
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">必填</th>
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">说明</th>
-            </tr>
-            <tr>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">input</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b; color:#51cf66;">✅</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">要转换的文字内容</td>
-            </tr>
-            <tr style="background:#16213e;">
-                <td style="padding:8px 12px; border:1px solid #1a508b;">voice</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">语音角色，默认 zh-CN-XiaoxiaoNeural</td>
-            </tr>
-            <tr>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">speed</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">number</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">语速，默认 1.0</td>
-            </tr>
-            <tr style="background:#16213e;">
-                <td style="padding:8px 12px; border:1px solid #1a508b;">pitch</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">音调，默认 "0"</td>
-            </tr>
-            <tr>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">style</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">语音风格，默认 "general"</td>
-            </tr>
-        </table>
-
-        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 JavaScript 示例：</p>
-        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>const response = await fetch('https://your-worker.workers.dev/v1/audio/speech', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        input: "你好，这是一个测试",
-        voice: "zh-CN-XiaoxiaoNeural",
-        speed: 1.0,
-        pitch: "0",
-        style: "general"
-    })
-});
-const audioBlob = await response.blob();
-// 播放或下载音频...</code></pre>
-
-        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 cURL 示例：</p>
-        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>curl -X POST "https://your-worker.workers.dev/v1/audio/speech" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "input": "你好，这是一个测试",
-    "voice": "zh-CN-XiaoxiaoNeural",
-    "speed": 1.0,
-    "pitch": "0",
-    "style": "general"
-  }' \
-  --output speech.mp3</code></pre>
-    </div>
-
-    <!-- 语音转文字 -->
-    <div style="background: #0f3460; border-radius: 12px; padding: 24px; border: 1px solid #1a508b;">
-        <h3 style="color: #45aaf2; margin: 0 0 8px 0; font-size: 20px;">🎧 语音转文字 (STT)</h3>
-        <p style="color: #a0a0b8; margin: 0 0 16px 0; font-size: 14px;">
-            <code style="background: #16213e; padding: 4px 10px; border-radius: 6px; color: #f08d49; font-weight: bold;">POST /v1/audio/transcriptions</code>
-            <span style="color: #666;"> — 将音频文件转录为文字</span>
-        </p>
-
-        <!-- 请求参数表 -->
-        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">
-            <tr style="background:#16213e;">
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">参数名</th>
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">类型</th>
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">必填</th>
-                <th style="padding:8px 12px; text-align:left; color:#ccc; border:1px solid #1a508b;">说明</th>
-            </tr>
-            <tr>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">file</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">File</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b; color:#51cf66;">✅</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">音频文件（multipart/form-data）</td>
-            </tr>
-            <tr style="background:#16213e;">
-                <td style="padding:8px 12px; border:1px solid #1a508b;">token</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">string</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">可选</td>
-                <td style="padding:8px 12px; border:1px solid #1a508b;">SiliconFlow Token（不提供则用默认）</td>
-            </tr>
-        </table>
-
-        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 JavaScript 示例：</p>
-        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>const formData = new FormData();
-formData.append('file', audioFile);        // 音频文件
-formData.append('token', 'sk-...');        // 可选
-
-const response = await fetch(
-    'https://your-worker.workers.dev/v1/audio/transcriptions',
-    { method: 'POST', body: formData }
-);
-
-const result = await response.json();
-console.log(result.text); // 转录结果</code></pre>
-
-        <p style="font-weight:bold; color:#f9e2af; margin:16px 0 6px 0; font-size:14px;">📋 cURL 示例：</p>
-        <pre style="background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.7; color:#cdd6f4; border:1px solid #1a508b;"><code>curl -X POST "https://your-worker.workers.dev/v1/audio/transcriptions" \
-  -F "file=@audio.mp3" \
-  -F "token=your-siliconflow-token"</code></pre>
-    </div>
     <script>
         let selectedFile = null;
         let currentInputMethod = 'text'; // 'text' or 'file'
@@ -1417,7 +1530,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': 'Completely Free',
                 'header.feature4': 'Download Support',
                 'mode.tts': 'Text to Speech',
-                'mode.transcription': 'Speech to Text'
+                'mode.transcription': 'Speech to Text',
+                'mode.apiDoc': 'API Docs',
+                'apidocs.title': '📡 API Reference',
+                'apidocs.subtitle': 'Text to Speech & Speech to Text, OpenAI-compatible',
+                'apidocs.tts': '🎙️ Text to Speech (TTS)',
+                'apidocs.tts.desc': 'Convert text to speech (MP3)',
+                'apidocs.stt': '🎧 Speech to Text (STT)',
+                'apidocs.stt.desc': 'Transcribe an audio file to text',
+                'apidocs.col.param': 'Parameter',
+                'apidocs.col.type': 'Type',
+                'apidocs.col.required': 'Required',
+                'apidocs.col.desc': 'Description',
+                'apidocs.optional': 'Optional',
+                'apidocs.tts.input': 'Text to convert',
+                'apidocs.tts.voice': 'Voice role, default zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': 'Speech rate, default 1.0',
+                'apidocs.tts.pitch': 'Pitch, default "0"',
+                'apidocs.tts.style': 'Speaking style, default "general"',
+                'apidocs.stt.file': 'Audio file (multipart/form-data)',
+                'apidocs.stt.token': 'SiliconFlow Token (falls back to server default)',
+                'apidocs.jsExample': '📋 JavaScript example:',
+                'apidocs.curlExample': '📋 cURL example:'
             },
             zh: {
                 'page.title': 'VoiceCraft - AI驱动的语音处理平台',
@@ -1439,7 +1573,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': '完全免费',
                 'header.feature4': '支持下载',
                 'mode.tts': '文字转语音',
-                'mode.transcription': '语音转文字'
+                'mode.transcription': '语音转文字',
+                'mode.apiDoc': 'API文档',
+                'apidocs.title': '📡 API 调用文档',
+                'apidocs.subtitle': '支持文字转语音 & 语音转文字，兼容 OpenAI 接口格式',
+                'apidocs.tts': '🎙️ 文字转语音 (TTS)',
+                'apidocs.tts.desc': '将文字转换为语音（MP3 格式）',
+                'apidocs.stt': '🎧 语音转文字 (STT)',
+                'apidocs.stt.desc': '将音频文件转录为文字',
+                'apidocs.col.param': '参数名',
+                'apidocs.col.type': '类型',
+                'apidocs.col.required': '必填',
+                'apidocs.col.desc': '说明',
+                'apidocs.optional': '可选',
+                'apidocs.tts.input': '要转换的文字内容',
+                'apidocs.tts.voice': '语音角色，默认 zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': '语速，默认 1.0',
+                'apidocs.tts.pitch': '音调，默认 "0"',
+                'apidocs.tts.style': '语音风格，默认 "general"',
+                'apidocs.stt.file': '音频文件（multipart/form-data）',
+                'apidocs.stt.token': 'SiliconFlow Token（不提供则用服务端默认）',
+                'apidocs.jsExample': '📋 JavaScript 示例：',
+                'apidocs.curlExample': '📋 cURL 示例：'
             },
             ja: {
                 'page.title': 'VoiceCraft - AI音声処理プラットフォーム',
@@ -1461,7 +1616,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': '完全無料',
                 'header.feature4': 'ダウンロード対応',
                 'mode.tts': 'テキスト読み上げ',
-                'mode.transcription': '音声テキスト変換'
+                'mode.transcription': '音声テキスト変換',
+                'mode.apiDoc': 'APIドキュメント',
+                'apidocs.title': '📡 API リファレンス',
+                'apidocs.subtitle': '音声合成・音声認識対応、OpenAI 互換',
+                'apidocs.tts': '🎙️ テキスト読み上げ (TTS)',
+                'apidocs.tts.desc': 'テキストを音声に変換（MP3）',
+                'apidocs.stt': '🎧 音声テキスト変換 (STT)',
+                'apidocs.stt.desc': '音声ファイルをテキストに起こす',
+                'apidocs.col.param': 'パラメータ',
+                'apidocs.col.type': '型',
+                'apidocs.col.required': '必須',
+                'apidocs.col.desc': '説明',
+                'apidocs.optional': '任意',
+                'apidocs.tts.input': '変換するテキスト',
+                'apidocs.tts.voice': '音声、既定 zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': '話速、既定 1.0',
+                'apidocs.tts.pitch': 'ピッチ、既定 "0"',
+                'apidocs.tts.style': 'スタイル、既定 "general"',
+                'apidocs.stt.file': '音声ファイル（multipart/form-data）',
+                'apidocs.stt.token': 'SiliconFlow Token（未指定時は既定値）',
+                'apidocs.jsExample': '📋 JavaScript 例：',
+                'apidocs.curlExample': '📋 cURL 例：'
             },
             ko: {
                 'page.title': 'VoiceCraft - AI 음성 처리 플랫폼',
@@ -1483,7 +1659,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': '완전 무료',
                 'header.feature4': '다운로드 지원',
                 'mode.tts': '텍스트 음성 변환',
-                'mode.transcription': '음성 텍스트 변환'
+                'mode.transcription': '음성 텍스트 변환',
+                'mode.apiDoc': 'API 문서',
+                'apidocs.title': '📡 API 레퍼런스',
+                'apidocs.subtitle': '텍스트-음성 및 음성-텍스트, OpenAI 호환',
+                'apidocs.tts': '🎙️ 텍스트 음성 변환 (TTS)',
+                'apidocs.tts.desc': '텍스트를 음성으로 변환 (MP3)',
+                'apidocs.stt': '🎧 음성 텍스트 변환 (STT)',
+                'apidocs.stt.desc': '오디오 파일을 텍스트로 변환',
+                'apidocs.col.param': '매개변수',
+                'apidocs.col.type': '타입',
+                'apidocs.col.required': '필수',
+                'apidocs.col.desc': '설명',
+                'apidocs.optional': '선택',
+                'apidocs.tts.input': '변환할 텍스트',
+                'apidocs.tts.voice': '음성, 기본값 zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': '말하기 속도, 기본값 1.0',
+                'apidocs.tts.pitch': '피치, 기본값 "0"',
+                'apidocs.tts.style': '스타일, 기본값 "general"',
+                'apidocs.stt.file': '오디오 파일 (multipart/form-data)',
+                'apidocs.stt.token': 'SiliconFlow Token (미입력 시 기본값)',
+                'apidocs.jsExample': '📋 JavaScript 예시:',
+                'apidocs.curlExample': '📋 cURL 예시:'
             },
             es: {
                 'page.title': 'VoiceCraft - Plataforma de Procesamiento de Voz con IA',
@@ -1505,7 +1702,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': 'Completamente Gratis',
                 'header.feature4': 'Soporte de Descarga',
                 'mode.tts': 'Texto a Voz',
-                'mode.transcription': 'Voz a Texto'
+                'mode.transcription': 'Voz a Texto',
+                'mode.apiDoc': 'Docs API',
+                'apidocs.title': '📡 Referencia de la API',
+                'apidocs.subtitle': 'Texto a voz y voz a texto, compatible con OpenAI',
+                'apidocs.tts': '🎙️ Texto a Voz (TTS)',
+                'apidocs.tts.desc': 'Convierte texto en audio (MP3)',
+                'apidocs.stt': '🎧 Voz a Texto (STT)',
+                'apidocs.stt.desc': 'Transcribe un archivo de audio',
+                'apidocs.col.param': 'Parámetro',
+                'apidocs.col.type': 'Tipo',
+                'apidocs.col.required': 'Obligatorio',
+                'apidocs.col.desc': 'Descripción',
+                'apidocs.optional': 'Opcional',
+                'apidocs.tts.input': 'Texto a convertir',
+                'apidocs.tts.voice': 'Voz, por defecto zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': 'Velocidad, por defecto 1.0',
+                'apidocs.tts.pitch': 'Tono, por defecto "0"',
+                'apidocs.tts.style': 'Estilo, por defecto "general"',
+                'apidocs.stt.file': 'Archivo de audio (multipart/form-data)',
+                'apidocs.stt.token': 'Token de SiliconFlow (usa el valor predeterminado)',
+                'apidocs.jsExample': '📋 Ejemplo en JavaScript:',
+                'apidocs.curlExample': '📋 Ejemplo con cURL:'
             },
             fr: {
                 'page.title': 'VoiceCraft - Plateforme de Traitement Vocal IA',
@@ -1527,7 +1745,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': 'Entièrement Gratuit',
                 'header.feature4': 'Support de Téléchargement',
                 'mode.tts': 'Texte vers Parole',
-                'mode.transcription': 'Parole vers Texte'
+                'mode.transcription': 'Parole vers Texte',
+                'mode.apiDoc': 'Docs API',
+                'apidocs.title': '📡 Référence de l\u2019API',
+                'apidocs.subtitle': 'Texte-parole et parole-texte, compatible OpenAI',
+                'apidocs.tts': '🎙️ Texte vers Parole (TTS)',
+                'apidocs.tts.desc': 'Convertit le texte en audio (MP3)',
+                'apidocs.stt': '🎧 Parole vers Texte (STT)',
+                'apidocs.stt.desc': 'Transcrit un fichier audio',
+                'apidocs.col.param': 'Paramètre',
+                'apidocs.col.type': 'Type',
+                'apidocs.col.required': 'Requis',
+                'apidocs.col.desc': 'Description',
+                'apidocs.optional': 'Facultatif',
+                'apidocs.tts.input': 'Texte à convertir',
+                'apidocs.tts.voice': 'Voix, par défaut zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': 'Débit, par défaut 1.0',
+                'apidocs.tts.pitch': 'Tonalité, par défaut "0"',
+                'apidocs.tts.style': 'Style, par défaut "general"',
+                'apidocs.stt.file': 'Fichier audio (multipart/form-data)',
+                'apidocs.stt.token': 'Token SiliconFlow (valeur par défaut sinon)',
+                'apidocs.jsExample': '📋 Exemple JavaScript :',
+                'apidocs.curlExample': '📋 Exemple cURL :'
             },
             de: {
                 'page.title': 'VoiceCraft - KI-gestützte Sprachverarbeitungsplattform',
@@ -1549,7 +1788,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': 'Völlig Kostenlos',
                 'header.feature4': 'Download-Unterstützung',
                 'mode.tts': 'Text zu Sprache',
-                'mode.transcription': 'Sprache zu Text'
+                'mode.transcription': 'Sprache zu Text',
+                'mode.apiDoc': 'API-Doku',
+                'apidocs.title': '📡 API-Referenz',
+                'apidocs.subtitle': 'Text zu Sprache und Sprache zu Text, OpenAI-kompatibel',
+                'apidocs.tts': '🎙️ Text zu Sprache (TTS)',
+                'apidocs.tts.desc': 'Wandelt Text in Audio um (MP3)',
+                'apidocs.stt': '🎧 Sprache zu Text (STT)',
+                'apidocs.stt.desc': 'Transkribiert eine Audiodatei',
+                'apidocs.col.param': 'Parameter',
+                'apidocs.col.type': 'Typ',
+                'apidocs.col.required': 'Erforderlich',
+                'apidocs.col.desc': 'Beschreibung',
+                'apidocs.optional': 'Optional',
+                'apidocs.tts.input': 'Zu wandelnder Text',
+                'apidocs.tts.voice': 'Stimme, Standard zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': 'Sprechtempo, Standard 1.0',
+                'apidocs.tts.pitch': 'Tonhöhe, Standard "0"',
+                'apidocs.tts.style': 'Stil, Standard "general"',
+                'apidocs.stt.file': 'Audiodatei (multipart/form-data)',
+                'apidocs.stt.token': 'SiliconFlow-Token (sonst Serverstandard)',
+                'apidocs.jsExample': '📋 JavaScript-Beispiel:',
+                'apidocs.curlExample': '📋 cURL-Beispiel:'
             },
             ru: {
                 'page.title': 'VoiceCraft - ИИ-платформа обработки голоса',
@@ -1571,7 +1831,28 @@ console.log(result.text); // 转录结果</code></pre>
                 'header.feature3': 'Совершенно Бесплатно',
                 'header.feature4': 'Поддержка Загрузки',
                 'mode.tts': 'Текст в Речь',
-                'mode.transcription': 'Речь в Текст'
+                'mode.transcription': 'Речь в Текст',
+                'mode.apiDoc': 'Документация API',
+                'apidocs.title': '📡 Справочник API',
+                'apidocs.subtitle': 'Текст в речь и речь в текст, совместимо с OpenAI',
+                'apidocs.tts': '🎙️ Текст в речь (TTS)',
+                'apidocs.tts.desc': 'Преобразует текст в аудио (MP3)',
+                'apidocs.stt': '🎧 Речь в текст (STT)',
+                'apidocs.stt.desc': 'Распознаёт аудиофайл в текст',
+                'apidocs.col.param': 'Параметр',
+                'apidocs.col.type': 'Тип',
+                'apidocs.col.required': 'Обязательно',
+                'apidocs.col.desc': 'Описание',
+                'apidocs.optional': 'Необязательно',
+                'apidocs.tts.input': 'Текст для преобразования',
+                'apidocs.tts.voice': 'Голос, по умолчанию zh-CN-XiaoxiaoNeural',
+                'apidocs.tts.speed': 'Скорость речи, по умолчанию 1.0',
+                'apidocs.tts.pitch': 'Тон, по умолчанию "0"',
+                'apidocs.tts.style': 'Стиль, по умолчанию "general"',
+                'apidocs.stt.file': 'Аудиофайл (multipart/form-data)',
+                'apidocs.stt.token': 'Токен SiliconFlow (иначе используется значение по умолчанию)',
+                'apidocs.jsExample': '📋 Пример JavaScript:',
+                'apidocs.curlExample': '📋 Пример cURL:'
             }
         };
 
@@ -1912,43 +2193,28 @@ console.log(result.text); // 转录结果</code></pre>
 
         // 初始化模式切换器
         function initializeModeSwitcher() {
-            const ttsMode = document.getElementById('ttsMode');
-            const transcriptionMode = document.getElementById('transcriptionMode');
-            const mainContent = document.querySelector('.main-content');
-            const transcriptionContainer = document.getElementById('transcriptionContainer');
-
-            ttsMode.addEventListener('click', function() {
-                switchMode('tts');
-            });
-
-            transcriptionMode.addEventListener('click', function() {
-                switchMode('transcription');
+            document.querySelectorAll('.mode-btn[data-panel]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    switchMode(this.getAttribute('data-panel'));
+                });
             });
         }
 
-        // 切换功能模式
-        function switchMode(mode) {
-            const ttsMode = document.getElementById('ttsMode');
-            const transcriptionMode = document.getElementById('transcriptionMode');
-            const mainContent = document.querySelector('.main-content');
-            const transcriptionContainer = document.getElementById('transcriptionContainer');
+        // 切换功能面板（按 data-panel 匹配按钮与面板）
+        function switchMode(panelId) {
+            const panelButtons = document.querySelectorAll('.mode-btn[data-panel]');
+            const panels = document.querySelectorAll('.panel[data-panel]');
             const wechatPromotion = document.getElementById('wechatPromotion');
 
-            currentMode = mode;
+            panelButtons.forEach(function(btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-panel') === panelId);
+            });
 
-            if (mode === 'tts') {
-                // 切换到TTS模式
-                ttsMode.classList.add('active');
-                transcriptionMode.classList.remove('active');
-                mainContent.style.display = 'block';
-                transcriptionContainer.style.display = 'none';
-            } else {
-                // 切换到语音转录模式
-                transcriptionMode.classList.add('active');
-                ttsMode.classList.remove('active');
-                mainContent.style.display = 'none';
-                transcriptionContainer.style.display = 'block';
-            }
+            panels.forEach(function(panel) {
+                panel.style.display = panel.getAttribute('data-panel') === panelId ? 'block' : 'none';
+            });
+
+            currentMode = panelId;
 
             // 隐藏推广组件
             wechatPromotion.style.display = 'none';
@@ -2175,8 +2441,8 @@ console.log(result.text); // 转录结果</code></pre>
                 return;
             }
             
-            // 切换到TTS模式
-            switchMode('tts');
+            // 切换到TTS面板
+            switchMode('tts-panel');
             
             // 将转录文本填入TTS文本框
             document.getElementById('text').value = transcriptionText;
@@ -3053,3 +3319,4 @@ async function handleAudioTranscription(request) {
         });
     }
 }
+
